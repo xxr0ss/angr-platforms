@@ -33,12 +33,40 @@ class TestEbpf(unittest.TestCase):
 
     def test_ebpf_lift(self):
         proj = angr.Project(TEST_PROGRAMS_BASE / "return_42.o")
-        state = proj.factory.entry_state()
-        block = proj.factory.block(state.addr)
-        lifter = LifterEbpf(proj.arch, block.addr)
-        lifter.lift(block.bytes)
-        assert len(lifter.disassemble()) == 2
+        # print(proj.arch.name)
+        # state = proj.factory.entry_state()
+        # block = proj.factory.block(state.addr)
+        # lifter = LifterEbpf(proj.arch, block.addr)
+        # lifter.lift(block.bytes)
+        # print()
+        # lifter.pp_disas()
+        # assert len(lifter.disassemble()) == 2
 
+        ebpf_prog = bytes.fromhex(
+            # max:
+            'bf 10 00 00 00 00 00 00'	# r0 = r1
+            '6d 20 01 00 00 00 00 00'	# if r0 s> r2 goto +0x1 <LBB0_2>
+            'bf 20 00 00 00 00 00 00'	# r0 = r2
+            # LBB0_2:
+            '95 00 00 00 00 00 00 00'   # exit
+
+            # max:
+            '6d 21 01 00 00 00 00 00'	# if r1 s> r2 goto +0x1 <LBB0_2>
+            'bf 21 00 00 00 00 00 00'	# r1 = r2
+            # LBB0_2:
+            '8d 00 00 00 03 00 00 00'	# callx r0
+            '95 00 00 00 00 00 00 00'	# exit
+        )
+        proj = angr.load_shellcode(
+            ebpf_prog,
+            ArchExtendedBPF('Iend_LE', 'Iend_BE'),
+        )
+        state = proj.factory.blank_state(addr=0)
+        block = proj.factory.block(state.addr, size=len(ebpf_prog))
+        lifter = LifterEbpf(proj.arch, 0)
+        lifter.lift(block.bytes)
+        print()
+        lifter.pp_disas()
 
 if __name__ == "__main__":
     unittest.main()

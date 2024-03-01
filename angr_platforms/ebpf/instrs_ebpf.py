@@ -253,10 +253,23 @@ class ALUInstruction(WithDestReg, ArithmeticOrJumpInstruction):
     def commit_result(self: ALUInstructionProtocol, res: VexValue) -> None:
         assert res.ty == self.size
         self.put(res, self.dest_reg)
+    
+    def disassemble(self):
+        dst_operand = f'r{self.dest_reg}'
+        src_operand = {
+            "imm": lambda: f'{self.immediate:#x}',
+            "reg": lambda: f'r{self.src_reg}'
+        }.get(self.source_name, lambda: 'TODO')()
+        return self.addr, f"{self.operation_name}{self.size_name}", (dst_operand, src_operand)
 
 
 class JumpInstruction(ArithmeticOrJumpInstruction):
     """Base Instruction for jumps"""
+    def disassemble(self):
+        if isinstance(self, Exit64):
+            return self.addr, self.name, ()
+
+        
 
 
 class LoadOrStoreInstruction(WithDestReg, EBPFInstruction, abc.ABC):
