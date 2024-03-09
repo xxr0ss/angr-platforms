@@ -1,5 +1,5 @@
 from archinfo import Arch, Register, RegisterOffset, register_arch
-
+import capstone
 
 class ArchExtendedBPF(Arch):
     """Extended BPF arch."""
@@ -10,6 +10,9 @@ class ArchExtendedBPF(Arch):
     vex_arch = "eBPF"
     qemu_name = "eBPF"
     ida_processor = "eBPF"
+
+    cs_arch = capstone.CS_ARCH_BPF
+    cs_mode = capstone.CS_MODE_BPF_EXTENDED
 
     max_inst_bytes = 8
     instruction_alignment = 1
