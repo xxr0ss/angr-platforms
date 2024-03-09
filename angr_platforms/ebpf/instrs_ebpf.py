@@ -262,6 +262,15 @@ class ALUInstruction(WithDestReg, ArithmeticOrJumpInstruction):
         }.get(self.source_name, lambda: 'TODO')()
         return self.addr, f"{self.operation_name}{self.size_name}", (dst_operand, src_operand)
 
+    def disassemble(self):
+        dst_operand = f'r{self.dest_reg}'
+        src_operand = {
+            "imm": lambda: f'{self.immediate:#x}',
+            "reg": lambda: f'r{self.src_reg}'
+        }.get(self.source_name, lambda: 'TODO')()
+        return self.addr, f"{self.operation_name}{self.size_name}", (dst_operand, src_operand)
+
+
 
 class JumpInstruction(ArithmeticOrJumpInstruction):
     """Base Instruction for jumps"""
@@ -270,6 +279,9 @@ class JumpInstruction(ArithmeticOrJumpInstruction):
             return self.addr, self.name, ()
 
         
+
+    def disassemble(self):
+        return self.addr, f"jump", ()
 
 
 class LoadOrStoreInstruction(WithDestReg, EBPFInstruction, abc.ABC):
@@ -555,7 +567,11 @@ class ArshOp(FetchDestination, FetchSource):
     operation_name = "arsh"
 
     def compute_result(self, src, dst):
-        return dst.sar(src)
+        # NOTE: We are using dst.sar() which generates Iop_Sar64,
+        # the Iop_Sar64 uses 'Ity_I8' as the shift type is generated
+        # so we need to cast the result to the correct type
+        sft = src.cast_to(Type.int_8)
+        return dst.sar(sft)
 
 
 #
@@ -770,7 +786,7 @@ class Exit64(Jump64Instruction):
     operation_bin = "1001"
 
     def compute_result(self):
-        self.jump(None, 0, JumpKind.Exit)  # irrelevant addr
+        self.jump(None, 0, JumpKind.Ret)
 
 
 Jump = (

@@ -7,7 +7,7 @@ class ArchExtendedBPF(Arch):
     name = "eBPF"
     bits = 64
 
-    vex_arch = None
+    vex_arch = "eBPF"
     qemu_name = "eBPF"
     ida_processor = "eBPF"
 
@@ -39,8 +39,11 @@ class ArchExtendedBPF(Arch):
         Register(name="syscall", vex_offset=88, size=8),
         Register(name="ip", vex_offset=96, size=8),
         Register(name="ip_at_syscall", vex_offset=104, size=8),
+        # dummy sp register to make stack analysis happy
+        Register(name="sp", vex_offset=112, size=8),
     ]
     bp_offset = RegisterOffset(80)
+    sp_offset = RegisterOffset(112)
 
 
 register_arch(["eBPF", "em_bpf"], 64, "any", ArchExtendedBPF)

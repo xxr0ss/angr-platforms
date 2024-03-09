@@ -44,6 +44,7 @@ class SimCcSyscallEbpf(SimCCSyscall):
 
 
 register_syscall_cc("eBPF", "eBPF", SimCcSyscallEbpf)
+register_syscall_cc("eBPF", "default", SimCcSyscallEbpf)
 
 
 class ExitSimProcedure(SimProcedure):
