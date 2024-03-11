@@ -1,5 +1,4 @@
 from archinfo import Arch, Register, RegisterOffset, register_arch
-from .disassemble_ebpf import CustomDisassemblerInsn
 
 class ArchExtendedBPF(Arch):
     """Extended BPF arch."""
@@ -10,8 +9,6 @@ class ArchExtendedBPF(Arch):
     vex_arch = "eBPF"
     qemu_name = "eBPF"
     ida_processor = "eBPF"
-
-    custom_disassemble_insn = CustomDisassemblerInsn
 
     max_inst_bytes = 8
     instruction_alignment = 1
